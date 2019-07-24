@@ -1,71 +1,67 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Jul 17 10:23:33 2019
 
-@author: XL273XM
-"""
-
-from coordinates import coordinates
+import csv
+from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from scipy.sparse.linalg import eigs
-from zones import zones
 
-tfl = nx.read_edgelist('lines', delimiter='|')
-n = nx.number_of_nodes(tfl)
+def plot_network(network, position, value, **kwds):
+    rag = LinearSegmentedColormap.from_list('RAG', 
+                                       ['xkcd:red', 
+                                        'xkcd:amber', 
+                                        'xkcd:green'])
+    
+    nx.draw(network, pos=position, 
+            node_size=75, node_color=value,
+            cmap=rag, 
+            edge_color='xkcd:light grey',
+            vmin=-1, vmax=1,
+            **kwds)
 
-fig, ax = plt.subplots()
-nx.draw_networkx(tfl, pos=coordinates, with_labels=False,
-                 node_size=20, font_size=10, 
-                 node_color='#333333',
-                 edge_color='#999999')
-ax.set_facecolor('#f0f0f0')
-plt.show()
+def main():
+    tfl = nx.read_edgelist('data/lines', delimiter='|')
+    n = nx.number_of_nodes(tfl)
+    
+    coordinates = {}
+    zones = {}
+    with open('data/stations.csv') as stations_file:
+        station_reader = csv.reader(stations_file, delimiter='|')
+        for row in station_reader:
+            coordinates[row[0]] = [float(row[1]), float(row[2])]
+            zones[row[0]] = row[3]
+    
+    plot_network(tfl, coordinates, 'xkcd:grey')
+    
+    L = nx.laplacian_matrix(tfl)
+    K = 100
+    lmbda, U = eigs(L.asfptype(), which='SM', k=K)
+    
+    fig, axs = plt.subplots(4, 4)
+    axs = axs.flatten()
+    for k in range(16):
+        plot_network(tfl, coordinates, np.sqrt(n) * U[:,k], ax=axs[k])
+        
+    mapping = {"1":7, "1/2":7, "2":7, "2/3":7.6, "3":8.2, "3/4":9.15, "4":10.1, 
+               "5":12, "5/6":12.4, "6":12.8, 
+               "6/7":13.4, 
+               "7":14, 
+               "8":16.5, "9":18.3, "S":18.3}
+    f = []
+    for station in tfl.nodes():
+        value = (np.random.uniform())**(1/3) * mapping[zones[station]]/6.4 - 1
+        f.append(value)
+    f = np.array(f)
+    
+    miss = np.random.choice(n, size=round(0.5*n), replace=False)
+    f[miss] = None
+    
+    plt.figure()
+    plot_network(tfl, coordinates, 'xkcd:light grey')
+    plot_network(tfl, coordinates, f)
 
-L = nx.laplacian_matrix(tfl)
-K=100
-lmbda, U = eigs(L.asfptype(), which='SM', k=K)
-
-fig, axs = plt.subplots(4, 4)
-axs = axs.flatten()
-for k in range(16):
-    nx.draw(tfl, pos=coordinates, with_labels=False,
-            node_size=20, font_size=10, 
-            cmap='RdYlGn', 
-            vmin=-1.0/np.sqrt(n), vmax=1.0/np.sqrt(n),
-            node_color=U[:,k], ax=axs[k])
-plt.show()
-
-fares = {1: 7, 1.5: 7, 2: 7, 2.5: 7.6, 3: 8.2, 3.5: 9.15, 4: 10.10, 4.5: 11.05, 
-         5: 12, 5.5: 12.4, 6: 12.8, 6.5: 13.4, 7: 14, 7.5: 15.25, 8: 16.5, 
-         9: 18.30, 9.5:22.92, 10: 27.55}
-
-f = np.zeros(n)
-i = 0
-for station in tfl.nodes():
-    zone = zones[station]
-    if zone == 0:
-        zone = 9
-    fare = fares[zone]
-    f[i] = fare * (np.random.uniform())**(1/3)
-    i += 1
-
-mis = np.random.choice(n, size=round(0.5*n))
-mis.sort()
-f[mis] = None
-f_mis = np.zeros(n)
-f_mis[mis] = 1
-f_mis[f_mis==0] = None
-
-fig, ax = plt.subplots()
-nx.draw_networkx(tfl, pos=coordinates, with_labels=False,
-                      node_size=20, node_color=f,
-                      cmap='RdYlGn',
-                      vmin=0, vmax=18.3,
-                      edge_color='#cccccc')
-nx.draw_networkx_nodes(tfl, pos=coordinates, with_labels=False, 
-                       node_size=20, node_color=f_mis,
-                       cmap='binary',
-                       vmin=0, vmax=5)
-plt.show()
+    
+if __name__ == '__main__':
+    main()
