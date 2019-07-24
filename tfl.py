@@ -34,6 +34,7 @@ def main():
             zones[row[0]] = row[3]
 
     plot_network(tfl, coordinates, 'xkcd:grey')
+    plt.show()
 
     L = nx.laplacian_matrix(tfl)
     K = 100
@@ -43,6 +44,7 @@ def main():
     axs = axs.flatten()
     for k in range(16):
         plot_network(tfl, coordinates, np.sqrt(n) * U[:,k], ax=axs[k])
+    plt.show()
 
     mapping = {"1":7, "1/2":7, "2":7, "2/3":7.6, "3":8.2, "3/4":9.15, "4":10.1,
                "5":12, "5/6":12.4, "6":12.8,
@@ -61,6 +63,7 @@ def main():
     plt.figure()
     plot_network(tfl, coordinates, 'xkcd:light grey')
     plot_network(tfl, coordinates, f)
+    plot.show()
 
 if __name__ == '__main__':
     main()
