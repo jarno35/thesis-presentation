@@ -11,9 +11,9 @@ from scipy.sparse.linalg import eigsh
 
 def rag_colormap():
     rag = LinearSegmentedColormap.from_list('RAG',
-                                       ['xkcd:green',
-                                        'xkcd:amber',
-                                        'xkcd:red'])
+                                            ['xkcd:green',
+                                            'xkcd:amber',
+                                            'xkcd:red'])
     return rag
 
 def plot_network(network, position, value, **kwds):
