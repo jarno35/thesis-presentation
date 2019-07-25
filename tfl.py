@@ -63,7 +63,7 @@ def main():
     plt.figure()
     plot_network(tfl, coordinates, 'xkcd:light grey')
     plot_network(tfl, coordinates, f)
-    plot.show()
+    plt.show()
 
 if __name__ == '__main__':
     main()
