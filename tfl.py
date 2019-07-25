@@ -48,8 +48,8 @@ def estimate(c, k, lmbda, U, y, miss):
     return U[:,0:k].dot(np.linalg.solve(U_obs.T.dot(U_obs) +
                         c * Lmbda, U_obs.T.dot(y[~miss])))
 
-def MSE(f, y, miss):
-    return np.mean(np.power(f[~miss] - y[~miss], 2))
+def MSE(f, y):
+    return np.square(np.subtract(f, y)).mean()
 
 def eigen(network, K):
     L = nx.laplacian_matrix(network)
@@ -57,7 +57,7 @@ def eigen(network, K):
     lmbda[0] = lmbda[1]
     return (lmbda, U)
 
-def optimize(lmbda, U, y, miss, g):
+def optimize(lmbda, U, y, miss, f0):
     n = len(y)
     minimum = 1e10
     c_space = np.logspace(-8, 8)
@@ -65,7 +65,7 @@ def optimize(lmbda, U, y, miss, g):
     for k in k_space:
         for c in c_space:
             f = estimate(c, k, lmbda, U, y, miss)
-            error = MSE(f, U.dot(g), np.zeros(n, dtype=bool))
+            error = MSE(f, f0)
             if error < minimum:
                 minimum = error
                 c_opt, k_opt = c, k
@@ -130,7 +130,7 @@ def main():
         plot_network(tfl, coordinates, 5 * np.sqrt(n) * U[:,k], ax=axs[k])
 
     # Path graph regression
-    c_opt, k_opt = optimize(kappa, V, z, miss, g0)
+    c_opt, k_opt = optimize(kappa, V, z, miss, h0)
     print(c_opt, k_opt)
     h = estimate(c_opt, k_opt, kappa, V, z, miss)
 
@@ -141,7 +141,7 @@ def main():
     plot_path_graph(ax, x, h, color='xkcd:orange')
 
     # TfL network regression
-    c_opt, k_opt = optimize(lmbda, U, y, miss, g0)
+    c_opt, k_opt = optimize(lmbda, U, y, miss, f0)
     print(c_opt, k_opt)
     f = estimate(c_opt, k_opt, lmbda, U, y, miss)
 
