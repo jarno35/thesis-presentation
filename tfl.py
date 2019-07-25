@@ -9,18 +9,30 @@ import numpy as np
 from scipy.sparse import diags
 from scipy.sparse.linalg import eigsh
 
-def plot_network(network, position, value, **kwds):
+def rag_colormap():
     rag = LinearSegmentedColormap.from_list('RAG',
-                                       ['xkcd:red',
+                                       ['xkcd:green',
                                         'xkcd:amber',
-                                        'xkcd:green'])
+                                        'xkcd:red'])
+    return rag
 
+def plot_network(network, position, value, **kwds):
+    rag = rag_colormap()
     nx.draw(network, pos=position,
             node_size=75, node_color=value,
             cmap=rag,
             edge_color='xkcd:light grey',
             vmin=-4, vmax=4,
             **kwds)
+
+def plot_path_graph(ax, x, f, color='xkcd:blue', **kwargs):
+    ax.plot(x, f, linewidth=2, c=color, **kwargs)
+    ax.get_xaxis().set_ticks([])
+    ax.get_yaxis().set_ticks([])
+    ax.set_ylim([-5, 5])
+
+def scatter_path_graph(ax, x, y, **kwargs):
+    ax.scatter(x, y,  marker='.', c='xkcd:black', **kwargs)
 
 def make_missing(y, p):
     n = len(y)
@@ -84,20 +96,20 @@ def main():
     z, miss = make_missing(z, 0.5)
 
     # Plot path graph example function and data
-    plt.figure()
-    plt.plot(x, h0)
-    plt.scatter(x, z)
+    fig, ax = plt.subplots()
+    plot_path_graph(ax, x, h0)
+    scatter_path_graph(ax, x, z)
 
     # Extract example coefficients
     P = nx.path_graph(n)
     K = 256
     kappa, V = eigen(P, K)
-    g0 = V.T.dot(f0)
+    g0 = V.T.dot(h0)
 
     # TfL network function using example coefficients
     lmbda, U = eigen(tfl, K)
-    f = U.dot(g0)
-    y = f + np.random.normal(size=n)
+    f0 = U.dot(g0)
+    y = f0 + np.random.normal(size=n)
     y[miss] = None
 
     # Plot TfL example function
@@ -109,10 +121,7 @@ def main():
     fig, axs = plt.subplots(4, 4)
     axs = axs.flatten()
     for k in range(16):
-        axs[k].plot(range(n), np.sqrt(n) * V[:,k])
-        axs[k].set_ylim([-1.25 * np.sqrt(2), 1.25 * np.sqrt(2)])
-        axs[k].get_xaxis().set_ticks([])
-        axs[k].get_yaxis().set_ticks([])
+        plot_path_graph(axs[k], x, 4.0 * np.sqrt(0.5 * n) * V[:,k])
 
     # Plot TfL network eigenfunctions
     fig, axs = plt.subplots(4, 4)
@@ -126,10 +135,10 @@ def main():
     h = estimate(c_opt, k_opt, kappa, V, z, miss)
 
     # Plot path graph estimate
-    plt.figure()
-    plt.scatter(x, z)
-    plt.plot(x, h)
-    plt.show()
+    fig, ax = plt.subplots()
+    plot_path_graph(ax, x, h0)
+    scatter_path_graph(ax, x, z)
+    plot_path_graph(ax, x, h, color='xkcd:orange')
 
     # TfL network regression
     c_opt, k_opt = optimize(lmbda, U, y, miss, g0)
@@ -142,3 +151,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    plt.show()
