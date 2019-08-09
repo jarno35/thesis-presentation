@@ -19,7 +19,7 @@ def estimate_labels(lmbda, U, obs, c, k):
     lmbda[0] = lmbda[1]  # to make eigenvalues invertible
     Lmbda = np.diag(1.0 / lmbda[0:k])
     U_obs = U[~miss,0:k]
-    estimate = U[:,0:k].dot(np.linalg.solve(U_obs.T.dot(U_obs) 
+    estimate = U[:,0:k].dot(np.linalg.solve(U_obs.T.dot(U_obs)
         + c * Lmbda, U_obs.T.dot(obs[~miss]).T))
     return np.ravel(estimate)
 
@@ -34,7 +34,7 @@ def estimate_rough(obs):
 
 def estimate_smooth(obs):
     """Take the average of the observed data on a network."""
-    estimate = np.nanmean(jubilee_labels) * np.ones(len(jubilee_labels))
+    estimate = np.nanmean(obs) * np.ones(len(obs))
     return estimate
 
 
@@ -56,17 +56,17 @@ def plot_network(network, position, value, colormap=None, **kwargs):
             cmap=colormap,
             edge_color='xkcd:light grey',
             **kwargs)
-    
+
 def plot_path_graph(ax, y, color='xkcd:blue', **kwargs):
     ax.plot(y, linewidth=2, c=color, **kwargs)
     ax.get_xaxis().set_ticks([])
     ax.get_yaxis().set_ticks([])
 
-    
+
 def project(target, basis, k):
     """Project the target on the first k terms of the basis."""
     return np.ravel(basis[:, 0:k].dot(basis[:, 0:k].T).dot(target))
-    
+
 
 def rag_colormap():
     """Defines a red-amber-green colormap."""
