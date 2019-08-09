@@ -93,7 +93,8 @@ def rough_example(n):
 
 
 def smooth_example(basis, k):
-    """Returns values of a smooth function that is the composition of k basis function."""
+    """Returns values of a smooth function that is the composition of k
+    basis function."""
     U = basis[:, 0:k]
     n = U.shape[0]
     return np.ravel(U.dot(U.T).dot(np.random.normal(size=n)))
@@ -126,5 +127,6 @@ def tfl_zone_labels(tfl, zones, p):
         if missing:
             zone_label.append(None)
         else:
-            zone_label.append(tfl_zone_value(zones[station]) + np.random.normal())
+            zone_label.append(tfl_zone_value(zones[station])
+            + np.random.normal())
     return np.array(zone_label, dtype=float)
