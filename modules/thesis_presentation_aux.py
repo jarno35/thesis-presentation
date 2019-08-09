@@ -57,6 +57,7 @@ def plot_network(network, position, value, colormap=None, **kwargs):
             edge_color='xkcd:light grey',
             **kwargs)
 
+
 def plot_path_graph(ax, y, color='xkcd:blue', **kwargs):
     ax.plot(y, linewidth=2, c=color, **kwargs)
     ax.get_xaxis().set_ticks([])
