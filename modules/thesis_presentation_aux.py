@@ -39,11 +39,6 @@ def estimate_smooth(obs):
     return estimate
 
 
-def florentine_families(file, **kwargs):
-    fam = nx.read_adjlist(file, **kwargs)
-    return fam
-
-
 def line_example(tfl, line, tfl_labels):
     """Gets the line labels from the larger TfL network for a certain line."""
     line_labels = []
