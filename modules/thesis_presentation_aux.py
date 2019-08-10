@@ -32,10 +32,16 @@ def estimate_rough(obs):
     estimate = np.interp(x, x[~miss], obs[~miss])
     return estimate
 
+
 def estimate_smooth(obs):
     """Take the average of the observed data on a network."""
     estimate = np.nanmean(obs) * np.ones(len(obs))
     return estimate
+
+
+def florentine_families(file, **kwargs):
+    fam = nx.read_adjlist(file, **kwargs)
+    return fam
 
 
 def line_example(tfl, line, tfl_labels):
