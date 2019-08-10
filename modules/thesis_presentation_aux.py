@@ -77,6 +77,32 @@ def rag_colormap():
     return rag
 
 
+def relative_neighborhood_graph(coords):
+    """Makes a relative neighborhood graph from an array of coordinates, i.e.
+    connects nodes u and v if there is no node w that is closer to both u or v
+    as they are to each other."""
+
+    def dist(u, v):
+        """Computes the squared distance between two nodes."""
+        return (u[0] - v[0])**2 + (u[1] - v[1])**2
+
+    G = nx.Graph()
+    for x, y in coords:
+        G.add_node((x, y))
+
+    for u in G.nodes():
+        for v in G.nodes():
+            dist_uv = dist(u, v)
+            for w in G.nodes():
+                dist_uw = dist(u, w)
+                dist_vw = dist(v, w)
+                if dist_uw < dist_uv and dist_vw < dist_uv:
+                    break
+            else:
+                G.add_edge(u, v)
+    return G
+
+
 def read_station_data(file, **kwargs):
     """Reads stations coordinates and zone from a file."""
     coordinates = {}
