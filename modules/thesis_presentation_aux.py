@@ -88,7 +88,7 @@ def relative_neighborhood_graph(coords):
 
     G = nx.Graph()
     for x, y in coords:
-        G.add_node((x, y))
+        G.add_node((x, y), x=x, y=y)
 
     for u in G.nodes():
         for v in G.nodes():
